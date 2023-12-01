@@ -1,30 +1,40 @@
 import grpc
-import time
+import json
 
 # Import the generated gRPC classes
 
-from binds import mission_pb2
-from binds import mission_pb2_grpc
+from dcs.mission.v0 import mission_pb2
+from dcs.mission.v0 import mission_pb2_grpc
 
 class eventFetcher:
-    def __init__(self, server_address, server_port):
+    def __init__(self, server_address, server_port, **kwargs):
         self.channel = grpc.insecure_channel(f'{server_address}:{server_port}')
         self.stub = mission_pb2_grpc.MissionServiceStub(self.channel)
-        self.currentEvents = []
-        
+        self.response = []
+        self.commomGD = kwargs["commom_game_data"]
+        print("\033[92m" + "EVENT FETCHER INITIALIZED" + "\033[0m")
+
     def fetch(self):
-        start = time.time()
         try:
-            # Make a gRPC request
             request = mission_pb2.StreamEventsRequest()
-
-            # Call the gRPC method
-            response = self.stub.StreamEvents(request)
-
-            # Print the response
-            self.currentEvents = response
-            end = time.time()
-            print("Events Refreshed - Elapsed time: " + str(end - start) + "s\n")
-
+            self.response = self.stub.StreamEvents(request)
+            print("Events Stream Initiated")
         except grpc.RpcError as e:
             print(f'Error: {e}')
+
+    def evaluateEvents(self):
+        futures = []
+        futures.append(self.response)
+        for event in futures:
+#            try:
+            repeat = True
+            while repeat:
+                newEvent = event.next()
+                # EVENT HANDLER
+                # PLAYER LEAVE UNIT
+                if not newEvent.HasField("simulation_fps") and not newEvent.HasField("weapon_add"):
+                    print(newEvent)
+                    if newEvent.HasField("player_leave_unit"): 
+                        print(newEvent.player_leave_unit.initiator.unit)
+                    elif newEvent.HasField("player_change_slot"):
+                        self.commomGD.onLinePlayersCheck()

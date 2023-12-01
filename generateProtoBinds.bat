@@ -1,0 +1,14 @@
+python -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. .\dcs\atmosphere\v0\atmosphere.proto
+python -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. .\dcs\coalition\v0\coalition.proto
+python -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. .\dcs\common\v0\common.proto
+python -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. .\dcs\controller\v0\controller.proto
+python -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. .\dcs\custom\v0\custom.proto
+python -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. .\dcs\group\v0\group.proto
+python -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. .\dcs\hook\v0\hook.proto
+python -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. .\dcs\mission\v0\mission.proto
+python -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. .\dcs\net\v0\net.proto
+python -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. .\dcs\timer\v0\timer.proto
+python -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. .\dcs\trigger\v0\trigger.proto
+python -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. .\dcs\tts\v0\tts.proto
+python -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. .\dcs\unit\v0\unit.proto
+python -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. .\dcs\world\v0\world.proto
