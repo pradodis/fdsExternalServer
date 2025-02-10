@@ -49,10 +49,44 @@ class missionZoneAttackPVP:
         self.commomGD = kwargs["commom_game_data"]
         self.r = kwargs["redis_conn"]
         self.llink = lua_link_module
+        self.live_zone_objects = {}
 	    # YAML FILE
         with open('server_config.yml', 'r') as file:
             self.configFile = yaml.safe_load(file)
+        ongoing_flag = self.r.get('ongoing_zoneassault')
+        if ongoing_flag is not None and ongoing_flag.decode('utf-8') == 'True':
+            self.reload_mission()
+        else:
+            self.new_start()
 
+    def send_zone_object_to_redis(self, obj):
+        # Inicialize o pipeline
+        pipeline = self.r.pipeline()
+        for zone, data in obj.items():
+            for uniorstruct, dataentity in data.items():
+                for entity in dataentity:
+                    entitydata = entity
+                    groupid_case = entity["groupId"]
+                    if uniorstruct == 'unit': 
+                        entitydata = entity['units'][0]
+                    keys_dictionary ={
+                        "type": entitydata["type"],
+                        "groupId": groupid_case,
+                        "y": entitydata["y"],
+                        "x": entitydata["x"],
+                        "name": entitydata["name"],
+                        "unitId": entitydata["unitId"],
+                        "oid": entity["oid"]
+                    }
+                    # Cria a chave e a processa para ficar em minúsculas e sem espaços
+                    key = ''.join(f"targetzones:{str(zone)}:{str(uniorstruct)}:{str(entity['oid'])}".lower().split())
+                    # Armazena a string JSON serializada no hash dentro do pipeline
+                    pipeline.hmset(key, keys_dictionary)
+        pipeline.hmset(key, keys_dictionary)
+        # Execute todas as operações no pipeline de uma só vez
+        pipeline.execute()
+
+    def new_start(self):
         #Init Static
         deviation0 = 150.0
         angle0 = 6.6
@@ -240,32 +274,10 @@ class missionZoneAttackPVP:
             rcv_file_processed = rcv_file
         rcv_file = json.loads(rcv_file_processed)
 
-        # Inicialize o pipeline
-        pipeline = self.r.pipeline()
-
-        for zone, data in rcv_file.items():
-            for uniorstruct, dataentity in data.items():
-                for entity in dataentity:
-                    entitydata = entity
-                    groupid_case = entity["groupId"]
-                    if uniorstruct == 'unit': 
-                        entitydata = entity['units'][0]
-                    keys_dictionary ={
-                        "type": entitydata["type"],
-                        "groupId": groupid_case,
-                        "y": entitydata["y"],
-                        "x": entitydata["x"],
-                        "name": entitydata["name"],
-                        "unitId": entitydata["unitId"]
-                    }
-                    # Cria a chave e a processa para ficar em minúsculas e sem espaços
-                    key = ''.join(f"targetzones:{str(zone)}:{str(uniorstruct)}:{str(entitydata['unitId'])}".lower().split())
-                    # Armazena a string JSON serializada no hash dentro do pipeline
-                    pipeline.hmset(key, keys_dictionary)
-        pipeline.hmset(key, keys_dictionary)
-
-        # Execute todas as operações no pipeline de uma só vez
-        pipeline.execute()
+        self.send_zone_object_to_redis(rcv_file)
 
         self.r.set("ongoing_zoneassault", "True")
         print("\033[94m" + "MAIN MISSION LOADED: ZONE ASSAULT PVP" + "\033[0m\n")
+
+    def reload_mission(self):
+        print("Reloaded")

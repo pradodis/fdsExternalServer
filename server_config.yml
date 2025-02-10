@@ -3,6 +3,7 @@ parameters:
   grpc_server_reconection_time: 5  
   redis_timeout: 10
   redis_reconection_time: 5
+  mist_retry_time: 5
 mainMission:
   unitsZones:
     InfAK: 17

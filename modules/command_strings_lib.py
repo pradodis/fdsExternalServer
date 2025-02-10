@@ -8,6 +8,7 @@ def generate_objective_structures(data):
     result_string = result_string + f"addO.type = '{data['type']}'\n "
     result_string = result_string + f"addO.heading = {data['heading']}\n "
     result_string = result_string + f"addCP = mist.dynAddStatic(addO)\n "
+    result_string = result_string + f"addCP['oid'] = StaticObject.getByName(addCP['name'])['id_']\n "
     result_string = result_string + f"table.insert(target_data['{data['zonename']}']['struct'], addCP)\n "
     return result_string
 
@@ -25,5 +26,6 @@ def generate_objective_groundUnits(data):
     result_string = result_string + f"addO.units[1].y = {data['y']}\n "
     result_string = result_string + f"addO.units[1].heading =  {data['heading']}\n "
     result_string = result_string + f"addUni = mist.dynAdd(addO)\n "
+    result_string = result_string + f"addUni['oid'] = Unit.getByName(addUni['units'][1]['name'])['id_']\n "
     result_string = result_string + f"table.insert(target_data['{data['zonename']}']['unit'], addUni)\n "
     return result_string
